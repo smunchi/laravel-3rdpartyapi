@@ -11,6 +11,10 @@ class Application
     public $isInteractive;
     public $hasConsentedToCreditSearch;
     public $hasConsentedForDataSharing;
+    public $key;
+    public $leadGroup;
+    public $type;
+    public $status;
     public $loanAmount;
     public $loanTerm;
     public $loanRepaymentFrequency;

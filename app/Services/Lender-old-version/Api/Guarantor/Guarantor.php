@@ -3,35 +3,16 @@
 namespace App\Services\Lender\Api\Guarantor;
 
 use App\Services\Lender\Api\LenderApi;
-use App\Services\Lender\Request\LenderRequest;
 use GuzzleHttp\Client;
 
 class Guarantor extends LenderApi
 {
-    public $response;
-    public $body;
-    public $header;
-    public $uri;
-    public $auth;
-
-    public function __construct(LenderRequest $lenderRequest)
-    {
-        parent::__construct($lenderRequest);
-
-        $this->uri = 'https://mtc.flg360.co.uk/api/APILeadCreateUpdate.php';
-        $this->header = [
-            'Content-Type' => 'text/xml; charset=UTF8',
-        ];
-
-        $this->authenticate();
-    }
-
     public function authenticate()
     {
-        $this->auth = json_decode($this->getAuthInfo());
+        return true;
     }
 
-    public function formatRequest()
+    public function sendRequest()
     {
         $dob = explode('-', $this->request->customer->dob);
         $year = $dob[0];
@@ -40,13 +21,12 @@ class Guarantor extends LenderApi
 
         $xml = '<?xml version="1.0" encoding="ISO-8859-1"?>';
         $xml = '<data><lead>';
-        $xml .= '<key>' . $this->auth->key . '</key>';
-        $xml .= '<leadgroup>' . $this->auth->leadgroup . '</leadgroup>';
-        $xml .= '<introducer>' . $this->auth->introducer . '</introducer>';
-        $xml .= '<status>' . $this->auth->status . '</status>';
-        $xml .= '<reference>' . $this->auth->reference . '</reference>';
-        $xml .= '<source>' . $this->auth->source . '</source>';
-        $xml .= '<medium>' . $this->auth->medium . '</medium>';
+        $xml .= '<key>' . $this->request->application->key . '</key>';
+        $xml .= '<leadgroup>' . $this->request->application->leadGroup . '</leadgroup>';
+        $xml .= '<introducer>' . $this->request->application->introducerReference . '</introducer>';
+        $xml .= '<status>' . $this->request->application->status . '</status>';
+        $xml .= '<reference>' . $this->request->application->applicationReference . '</reference>';
+        $xml .= '<source>' . $this->request->application->applicationReference . '</source>';
         $xml .= '<title>' . $this->request->customer->title . '</title>';
         $xml .= '<firstname>' . $this->request->customer->firstName . '</firstname>';
         $xml .= '<lastname>' . $this->request->customer->lastName . '</lastname>';
@@ -91,33 +71,24 @@ class Guarantor extends LenderApi
         $xml .= '<contactphone>' . $this->request->commsPreferences->byPhone . '</contactphone>';
         $xml .= '<contactsms>' . $this->request->commsPreferences->bySMS . '</contactsms>';
         $xml .= '<contactemail>' . $this->request->commsPreferences->byEmail . '</contactemail>';
-        $xml .= '</lead></data>';
+        $xml .= '</lead>';
+        $xml .= '</data>';
 
-        $this->body = $xml;
-    }
 
-    public function sendRequest()
-    {
         $client = new Client();
-        $create = $client->request('POST', $this->uri, [
-            'headers' => $this->header,
-            'body' => $this->body
+        $create = $client->request('POST', 'https://mtc.flg360.co.uk/api/APILeadCreateUpdate.php', [
+            'headers' => [
+                'Content-Type' => 'text/xml; charset=UTF8',
+            ],
+            'body' => $xml
         ]);
 
-        $this->response = $create->getBody();
+        echo $create->getBody();
     }
 
     public function getResponse()
     {
-        $msg = '';
-        $response = simplexml_load_string($this->response);
-
-        if (($response->status == constant::SUCCESS_STATUS) && ($response->item->message == 'OK')) {
-            $msg = $response->item->message;
-        } else {
-            $msg = $response->item->message;
-        }
-
-        return $msg;
+        // TODO: Implement getResponse() method.
     }
+
 }

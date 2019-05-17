@@ -28,7 +28,7 @@ class HomeController extends Controller
    
     public function testLender()
     {
-        $loanAmount = 100;
+	$loanAmount = 100;
         $loanTerm = 3;
         $isSpeculative = true;
         $isInteractive = true;
@@ -82,8 +82,8 @@ class HomeController extends Controller
         );
 
 
-        $accountNumber = '332';
-        $sortCode = '2332';
+        $accountNumber = '12-34-56';
+        $sortCode = '123456';
         $bank = new Bank(
             $accountNumber,
             $sortCode
@@ -115,15 +115,15 @@ class HomeController extends Controller
         $gDOB = '1988-09-09';
         $gAddress = 'khulna';
         $gPostTown = 'khulna';
-        $gPostCode = '9000';
+        $gPostCode = 'RM9 6AN';
         $gEmail = 'salah_cse_mbstu@yahoo.com';
         $gMobileTel = '045';
         $gMonthlyIncome = '300';
         $gMonthlyMortgageOrRent = '2';
         $gEmploymentType = 'PartTimeEmployed';
         $gBankAccName = 'Md Rawshan';
-        $gBankAccSortCode = '433';
-        $gBankAccNumber = '34';
+        $gBankAccSortCode = '12-34-56';
+        $gBankAccNumber = '123456';
         $guarantor = new \App\Services\Lender\Request\Guarantor(
             $gTitle,
             $gFirstName,
@@ -143,9 +143,9 @@ class HomeController extends Controller
         );
 
 
-        $homePhone = '34';
-        $mobilePhone = '43';
-        $emailHome = '44';
+        $homePhone = '01224478782';
+        $mobilePhone = '01224478780';
+        $emailHome = 'salah_cse_mbstu@yahoo.com';
         $contact = new Contact(
             $homePhone,
             $mobilePhone,
@@ -167,6 +167,8 @@ class HomeController extends Controller
         );
 
         $api = new Guarantor($request);
+        $api->formatRequest();
         $api->sendRequest();
+        $api->getResponse();
     }
 }
