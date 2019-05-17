@@ -26,7 +26,6 @@ class Application
     public function __construct(
         $loanAmount,
         $loanTerm,
-        $purpose,
         $isSpeculative,
         $isInteractive,
         $hasConsentedToCreditSearch,
@@ -34,7 +33,6 @@ class Application
     ) {
         $this->loanAmount = $loanAmount;
         $this->loanTerm = $loanTerm;
-        $this->purpose = $purpose;
         $this->isSpeculative = $isSpeculative;
         $this->isInteractive = $isInteractive;
         $this->hasConsentedToCreditSearch = $hasConsentedToCreditSearch;

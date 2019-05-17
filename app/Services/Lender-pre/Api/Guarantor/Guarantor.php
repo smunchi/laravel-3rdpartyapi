@@ -3,32 +3,32 @@
 namespace App\Services\Lender\Api\Guarantor;
 
 use App\Services\Lender\Api\LenderApi;
-use App\Services\Lender\Api\LenderResponse;
 use App\Services\Lender\Request\LenderRequest;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Log;
 
 class Guarantor extends LenderApi
 {
     public $response;
+    public $body;
     public $header;
     public $uri;
+    public $auth;
 
-    public function __construct(LenderRequest $lenderRequest, $apiCredentials)
+    public function __construct(LenderRequest $lenderRequest)
     {
-        parent::__construct($lenderRequest, json_decode($apiCredentials));
+        parent::__construct($lenderRequest);
 
         $this->uri = 'https://mtc.flg360.co.uk/api/APILeadCreateUpdate.php';
-
         $this->header = [
             'Content-Type' => 'text/xml; charset=UTF8',
         ];
+
+        $this->authenticate();
     }
 
-    public function submitApplication():LenderResponse
+    public function authenticate()
     {
-        $xmlRequestBody = $this->formatRequest();
-        return $this->sendRequest($xmlRequestBody);
+        $this->auth = json_decode($this->getAuthInfo());
     }
 
     public function formatRequest()
@@ -39,21 +39,20 @@ class Guarantor extends LenderApi
         $day = $dob[2];
 
         $xml = '<?xml version="1.0" encoding="ISO-8859-1"?>';
-        $xml .= '<data><lead>';
-        $xml .= '<key>' . $this->credentials->key . '</key>';
-        $xml .= '<leadgroup>' . $this->credentials->leadgroup . '</leadgroup>';
-        $xml .= '<introducer>' . $this->credentials->introducer . '</introducer>';
-        $xml .= '<status>' . $this->credentials->status . '</status>';
-        $xml .= '<reference>' . $this->credentials->reference . '</reference>';
-        $xml .= '<source>' . $this->credentials->source . '</source>';
-        $xml .= '<medium>' . $this->credentials->medium . '</medium>';
+        $xml = '<data><lead>';
+        $xml .= '<key>' . $this->auth->key . '</key>';
+        $xml .= '<leadgroup>' . $this->auth->leadgroup . '</leadgroup>';
+        $xml .= '<introducer>' . $this->auth->introducer . '</introducer>';
+        $xml .= '<status>' . $this->auth->status . '</status>';
+        $xml .= '<reference>' . $this->auth->reference . '</reference>';
+        $xml .= '<source>' . $this->auth->source . '</source>';
+        $xml .= '<medium>' . $this->auth->medium . '</medium>';
         $xml .= '<title>' . $this->request->customer->title . '</title>';
         $xml .= '<firstname>' . $this->request->customer->firstName . '</firstname>';
         $xml .= '<lastname>' . $this->request->customer->lastName . '</lastname>';
-        $xml .= '<phone1>' . $this->request->contact->mobilePhone . '</phone1>';
-        $xml .= '<phone2>' . $this->request->contact->homePhone . '</phone2>';
+        $xml .= '<phone1>' . $this->request->contact->mobilePhone. '</phone1>';
+        $xml .= '<phone2>' . $this->request->contact->homePhone. '</phone2>';
         $xml .= '<email>' . $this->request->contact->emailHome . '</email>';
-        $xml .= '<address>' . $this->getAddress() . '</address>';
         $xml .= '<towncity>' . $this->request->address->city . '</towncity>';
         $xml .= '<postcode>' . $this->request->address->postCode . '</postcode>';
         $xml .= '<dobday>' . $day . '</dobday>';
@@ -63,7 +62,7 @@ class Guarantor extends LenderApi
         $xml .= '<data2>' . $this->request->application->loanTerm . '</data2>';
         $xml .= '<data3>' . $this->request->application->purpose . '</data3>';
         $xml .= '<data5>' . $this->request->address->residentialStatus . '</data5>';
-        $xml .= '<data6>' . ($this->request->address->monthAtAddress > 36 ? 'More than 3 years' : 'Less than 3 years') . '</data6>';
+        $xml .= '<data6>' . $this->request->address->monthAtAddress . '</data6>';
         $xml .= '<data7>' . $this->request->address->previousAddressPostCode . '</data7>';
         $xml .= '<data8>' . $this->request->address->previousAddressHouseNameOrNumber . '</data8>';
         $xml .= '<data9>' . $this->request->bank->sortCode . '</data9>';
@@ -94,73 +93,31 @@ class Guarantor extends LenderApi
         $xml .= '<contactemail>' . $this->request->commsPreferences->byEmail . '</contactemail>';
         $xml .= '</lead></data>';
 
-        return $xml;
+        $this->body = $xml;
     }
 
-    private function getAddress()
-    {
-        $address = [];
-
-        if (!empty($this->request->address->houseName)) {
-            $address[] = 'House name: ' . $this->request->address->houseName;
-        }
-
-        if (!empty($this->request->address->houseNumber)) {
-            $address[] = 'House number: ' . $this->request->address->houseNumber;
-        }
-
-        if (!empty($this->request->address->flat)) {
-            $address[] = 'Flat: ' . $this->request->address->flat;
-        }
-
-        if (!empty($this->request->address->roadName)) {
-            $address[] = 'Road name: ' . $this->request->address->roadName;
-        }
-
-        if (!empty($this->request->address->roadNumber)) {
-            $address[] = 'Road number: ' . $this->request->address->roadNumber;
-        }
-
-        $address = implode(', ', $address);
-
-        return $address;
-    }
-
-    /**
-     * @param $xmlRequestBody
-     * @return LenderResponse
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    private function sendRequest($xmlRequestBody): LenderResponse
+    public function sendRequest()
     {
         $client = new Client();
         $create = $client->request('POST', $this->uri, [
             'headers' => $this->header,
-            'body' => $xmlRequestBody
+            'body' => $this->body
         ]);
 
-        return $this->parseResponse($create->getBody());
+        $this->response = $create->getBody();
     }
 
-    private function parseResponse($xmlResponse): LenderResponse
+    public function getResponse()
     {
-        $response = simplexml_load_string($xmlResponse);
+        $msg = '';
+        $response = simplexml_load_string($this->response);
 
-        if (($response->status == 0) && ($response->item->message == 'OK')) {
-
-            $status = $response->status == 0 ? 'Fully Approved' : 'Declined';
-
-            $redirectUrl = 'https://www.guarantormyloan.co.uk/gl/gmlupdate.php?Ref=' . $response->item->id;
-
-            $lenderResponse = new LenderResponse($status);
-            $lenderResponse->setRedirectUrl($redirectUrl);
-
-            return $lenderResponse;
+        if (($response->status == constant::SUCCESS_STATUS) && ($response->item->message == 'OK')) {
+            $msg = $response->item->message;
+        } else {
+            $msg = $response->item->message;
         }
 
-        $errorMessage = $response->item->message;
-        Log::error($errorMessage);
-
-        return new LenderResponse('Failed');
+        return $msg;
     }
 }

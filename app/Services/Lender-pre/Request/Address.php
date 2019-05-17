@@ -19,8 +19,6 @@ class Address
     public $previousAddressHouseNameOrNumber;
 
     public function __construct(
-        $residentialStatus,
-        $monthAtAddress,
         $houseName,
         $houseNumber,
         $flat,
@@ -29,8 +27,6 @@ class Address
         $postCode,
         $dateMovedIn
     ) {
-        $this->residentialStatus = $residentialStatus;
-        $this->monthAtAddress = $monthAtAddress;
         $this->houseName = $houseName;
         $this->houseNumber = $houseNumber;
         $this->flat = $flat;

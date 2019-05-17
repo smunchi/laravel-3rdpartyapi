@@ -2,28 +2,18 @@
 
 namespace App\Services\Lender\Api;
 
-use App\Models\Users\Lender;
-use App\Services\Lender\Api\Guarantor\constant;
 use App\Services\Lender\Request\LenderRequest;
 
 abstract class LenderApi
 {
     public $request;
-    public $lender;
+    public $credentials;
 
-    abstract protected function authenticate();
-    abstract protected function sendRequest();
-    abstract protected function getResponse();
+    abstract protected function submitApplication(): LenderResponse;
 
-    public function __construct(LenderRequest $lenderRequest)
+    public function __construct(LenderRequest $lenderRequest, $credentials)
     {
         $this->request = $lenderRequest;
-    }
-
-    public function getAuthInfo()
-    {
-        $data = Lender::where(['name'=>$this->lender])->first();
-
-        return $data->api_credentials;
+        $this->credentials = $credentials;
     }
 }
