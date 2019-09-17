@@ -12,7 +12,6 @@ class Customer
     public $gender;
     public $maritalStatus;
     public $employmentStatus;
-    public $applicantRoleType;
 
     public function __construct(
         $title,

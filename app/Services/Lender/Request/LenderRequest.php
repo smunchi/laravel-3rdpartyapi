@@ -17,31 +17,16 @@ class LenderRequest
     public $customer;
     public $address;
     public $bank;
-    public $employment;
-    public $incomeExpense;
-    public $guarantor;
-    public $commsPreferences;
-    public $contact;
 
     public function __construct(
         Application $application,
         Customer $customer,
         Address $address,
-        Bank $bank,
-        Employment $employment,
-        IncomeExpense $incomeExpense,
-        Guarantor $guarantor,
-        Contact $contact,
-        CommsPreferences $commsPreferences
+        Bank $bank
     ) {
         $this->application = $application;
         $this->customer = $customer;
         $this->address = $address;
         $this->bank = $bank;
-        $this->employment = $employment;
-        $this->incomeExpense = $incomeExpense;
-        $this->guarantor = $guarantor;
-        $this->contact = $contact;
-        $this->commsPreferences = $commsPreferences;
     }
 }
