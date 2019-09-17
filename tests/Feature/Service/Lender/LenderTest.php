@@ -2,16 +2,11 @@
 
 namespace Tests\Service\Service\Lender;
 
-use App\Models\Users\Lender;
 use App\Services\Lender\Api\Guarantor\Guarantor;
 use App\Services\Lender\Api\LenderResponse;
 use App\Services\Lender\Request\Address;
 use App\Services\Lender\Request\Bank;
-use App\Services\Lender\Request\CommsPreferences;
-use App\Services\Lender\Request\Contact;
 use App\Services\Lender\Request\Customer;
-use App\Services\Lender\Request\Employment;
-use App\Services\Lender\Request\IncomeExpense;
 use App\Services\Lender\Request\LenderRequest;
 use App\Services\Lender\Request\Application;
 use Tests\TestCase;
@@ -56,7 +51,6 @@ class LenderTest extends TestCase
         $roadName = 'mona road';
         $city = 'Dhaka';
         $postCode = 'CM9 4CS';
-        $dateMovedIn = '2019-03-03';
         $address = new Address(
             $residentialStatus,
             $monthAtAddress,
@@ -65,8 +59,7 @@ class LenderTest extends TestCase
             $flat,
             $roadName,
             $city,
-            $postCode,
-            $dateMovedIn
+            $postCode
         );
 
         $accountNumber = '12-34-56';
@@ -83,7 +76,7 @@ class LenderTest extends TestCase
             $bank
         );
 
-        $apiCredentials = array("uri"=> "", "applicantType"=> "Main");
+        $apiCredentials = json_encode(array("uri"=> "", "applicantType"=> "Main"));
 
         $api = new Guarantor($request, $apiCredentials);
         $response = $api->submitApplication();
