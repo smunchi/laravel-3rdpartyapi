@@ -6,79 +6,69 @@ use App\Services\Lender\Api\Guarantor\Guarantor;
 use App\Services\Lender\Api\LenderResponse;
 use App\Services\Lender\Request\Address;
 use App\Services\Lender\Request\Bank;
+use App\Services\Lender\Request\Credential;
 use App\Services\Lender\Request\Customer;
 use App\Services\Lender\Request\LenderRequest;
 use App\Services\Lender\Request\Application;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class LenderTest extends TestCase
 {
     public function testGuarantorLender()
     {
-        $loanAmount = 2000;
-        $loanTerm = 3;
-        $purpose = 'Shopping';
         $application = new Application(
-            $loanAmount,
-            $loanTerm,
-            $purpose
+            2000,
+            3,
+            'Shopping'
         );
 
-        $title = 'Mr';
-        $firstName = 'john';
-        $lastName = 'smith';
-        $dob = '1986-11-05';
-        $gender = 'Male';
-        $maritalStatus = 'Married';
-        $employmentStatus = 'FullTimeEmployed';
-        $totalDependent = 3;
         $customer = new Customer(
-            $title,
-            $firstName,
-            $lastName,
-            $dob,
-            $gender,
-            $maritalStatus,
-            $employmentStatus,
-            $totalDependent
+            'Mr',
+            'john',
+            'smith',
+            '1986-11-05',
+            'Male',
+            'Married',
+            'FullTimeEmployed',
+            3
         );
 
-        $residentialStatus = 'Homeowner';
-        $monthAtAddress = '37';
-        $houseName = 'east vila';
-        $houseNumber = '10';
-        $flat = '20';
-        $roadName = 'mona road';
-        $city = 'Dhaka';
-        $postCode = 'CM9 4CS';
         $address = new Address(
-            $residentialStatus,
-            $monthAtAddress,
-            $houseName,
-            $houseNumber,
-            $flat,
-            $roadName,
-            $city,
-            $postCode
+            'Homeowner',
+            '37',
+            'east vila',
+            '10',
+            '20',
+            'mona road',
+            'Dhaka',
+            'CM9 4CS'
         );
 
-        $accountNumber = '12-34-56';
-        $sortCode = '123456';
         $bank = new Bank(
-            $accountNumber,
-            $sortCode
+            '12-34-56',
+            '123456'
+        );
+
+        $credential = new Credential(
+            [
+                "uri"=> "",
+                "applicantType"=> "Main",
+                "key" => "",
+                'headers' => [
+                    'Content-Type' => 'text/xml; charset=UTF8',
+                ]
+            ]
         );
 
         $request = new LenderRequest(
             $application,
             $customer,
             $address,
-            $bank
+            $bank,
+            $credential
         );
 
-        $apiCredentials = json_encode(array("uri"=> "", "applicantType"=> "Main"));
-
-        $api = new Guarantor($request, $apiCredentials);
+        $api = new Guarantor($request);
         $response = $api->submitApplication();
         $this->assertInstanceOf(LenderResponse::class, $response);
         $this->assertEquals('Approved', $response->getStatus());

@@ -17,16 +17,19 @@ class LenderRequest
     public $customer;
     public $address;
     public $bank;
+    public $credential;
 
     public function __construct(
         Application $application,
         Customer $customer,
         Address $address,
-        Bank $bank
+        Bank $bank,
+        Credential $credential
     ) {
         $this->application = $application;
         $this->customer = $customer;
         $this->address = $address;
         $this->bank = $bank;
+        $this->credential = $credential;
     }
 }

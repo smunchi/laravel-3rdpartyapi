@@ -7,13 +7,11 @@ use App\Services\Lender\Request\LenderRequest;
 abstract class LenderApi
 {
     public $request;
-    public $credentials;
 
     abstract protected function submitApplication(): LenderResponse;
 
-    public function __construct(LenderRequest $lenderRequest, $credentials)
+    public function __construct(LenderRequest $lenderRequest)
     {
         $this->request = $lenderRequest;
-        $this->credentials = $credentials;
     }
 }

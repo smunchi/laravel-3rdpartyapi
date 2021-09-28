@@ -11,15 +11,10 @@ use Illuminate\Support\Facades\Log;
 class Guarantor extends LenderApi
 {
     public $response;
-    public $header;
 
-    public function __construct(LenderRequest $lenderRequest, $apiCredentials)
+    public function __construct(LenderRequest $lenderRequest)
     {
-        parent::__construct($lenderRequest, json_decode($apiCredentials));
-
-        $this->header = [
-            'Content-Type' => 'text/xml; charset=UTF8',
-        ];
+        parent::__construct($lenderRequest);
     }
 
     public function submitApplication():LenderResponse
@@ -37,7 +32,7 @@ class Guarantor extends LenderApi
 
         $xml = '<?xml version="1.0" encoding="ISO-8859-1"?>';
         $xml .= '<data><lead>';
-        $xml .= '<key>' . $this->credentials->key . '</key>';
+        $xml .= '<key>' . $this->request->credential->credential['key'] . '</key>';
         $xml .= '<title>' . $this->request->customer->title . '</title>';
         $xml .= '<firstname>' . $this->request->customer->firstName . '</firstname>';
         $xml .= '<lastname>' . $this->request->customer->lastName . '</lastname>';
@@ -90,8 +85,8 @@ class Guarantor extends LenderApi
     private function sendRequest($xmlRequestBody): LenderResponse
     {
         $client = new Client();
-        $create = $client->request('POST', $this->credentials['uri'], [
-            'headers' => $this->header,
+        $create = $client->request('POST', $this->request->credential->credential['uri'], [
+            'headers' => $this->request->credential->credential['headers'],
             'body' => $xmlRequestBody
         ]);
 
